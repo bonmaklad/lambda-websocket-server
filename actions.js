@@ -14,26 +14,12 @@ const pool = mariadb.createPool({
   connectionLimit: 20,
 });
 
-const sendToOne = async (id, body) => {
-  try {
-    await client.postToConnection({
-      'ConnectionId': id,
-      'Data': Buffer.from(JSON.stringify(body)),
-    }).promise();
-  } catch (err) {
-    console.error(err);
-  }
-};
-
-const sendToAll = async (ids, body) => {
-  const all = ids.map(i => sendToOne(i, body));
-  return Promise.all(all);
-};
-
+//set up connect and do nothing
 export const $connect = async () => {
   return {};
 };
 
+//Create a user or return confirmation the user exsists. Thinking this should be run every time someone logs onto necta to slowly migrate 
 export const setName = async (payload) => {
   const connection = await pool.getConnection();
   try {
@@ -60,54 +46,10 @@ export const setName = async (payload) => {
       connection.release();
     }
   }
-};
-
-
-
-
-
-
-export const updateName = async (payload, meta) => {
-  const connection = await pool.getConnection();
-  try {
-    const query = "UPDATE users SET name = ? WHERE id = ?";
-    await connection.query(query, [payload.name, payload.id]);
-
-    // Return the updated name in the response
-    return { name: payload.name };
-  } catch (err) {
-    console.error(err);
-  } finally {
-    if (connection) {
-      connection.release();
-    }
-  }
-
   return {};
 };
 
-
-
-export const sendPublic = async (payload, meta) => {
-  const connection = await pool.getConnection();
-  try {
-    const query = "SELECT user FROM users WHERE id = ?";
-    const result = await connection.query(query, [meta.connectionId]);
-    const senderUser = result[0].user;
-
-    const message = `${senderUser}: ${payload.message}`;
-    await sendToAll(Object.keys(ids), { publicMessage: message });
-  } catch (err) {
-    console.error(err);
-  } finally {
-    if (connection) {
-      connection.release();
-    }
-  }
-
-  return {};
-};
-
+//create a one on one private message room. Used for when you want to send someone a message on necta for the first time
 export const sendPrivate = async (payload, meta) => {
   const connection = await pool.getConnection();
   try {
@@ -132,6 +74,74 @@ export const sendPrivate = async (payload, meta) => {
   return {};
 };
 
+//send a message to someone inside that private 1:1 room 
+const sendToOne = async (id, body) => {
+  try {
+    await client.postToConnection({
+      'ConnectionId': id,
+      'Data': Buffer.from(JSON.stringify(body)),
+    }).promise();
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+//create a room and choose who goes in there. This could be used for us to either
+// force someone into a room with one of us OR put someone in touch with a hiring manager 
+// can also use it to create rooms people can chat in later. 
+export const sendPublic = async (payload, meta) => {
+  const connection = await pool.getConnection();
+  try {
+    const query = "SELECT user FROM users WHERE id = ?";
+    const result = await connection.query(query, [meta.connectionId]);
+    const senderUser = result[0].user;
+
+    const message = `${senderUser}: ${payload.message}`;
+    await sendToAll(Object.keys(ids), { publicMessage: message });
+  } catch (err) {
+    console.error(err);
+  } finally {
+    if (connection) {
+      connection.release();
+    }
+  }
+
+  return {};
+};
+
+//send to all is about sending a message in a group setting. Will have to think how we use this
+const sendToAll = async (ids, body) => {
+  const all = ids.map(i => sendToOne(i, body));
+  return Promise.all(all);
+};
+
+
+
+
+//this isn't used, I created for testing. 
+export const updateName = async (payload, meta) => {
+  const connection = await pool.getConnection();
+  try {
+    const query = "UPDATE users SET name = ? WHERE id = ?";
+    await connection.query(query, [payload.name, payload.id]);
+
+    // Return the updated name in the response
+    return { name: payload.name };
+  } catch (err) {
+    console.error(err);
+  } finally {
+    if (connection) {
+      connection.release();
+    }
+  }
+
+  return {};
+};
+
+
+
+
+//disconnect when they leave necta. Now what do we do about push notifications?
 export const $disconnect = async (payload, meta) => {
   const connection = await pool.getConnection();
   try {

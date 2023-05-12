@@ -3,5 +3,5 @@
     "connectionId": "test-connection-id",
     "routeKey": "setName"
   },
-  "body": "{\"name\": \"John Doe\"}"
+  "body": "{\"name\": \"Glser\", \"email\": \"tesst4@example.com\"}"
 }

@@ -1,5 +1,7 @@
 import { LambdaActions } from 'lambda-actions';
-import { $connect, $disconnect, setName, sendPublic, sendPrivate } from './actions.js';
+import { $connect, $disconnect, setName, updateName, sendPublic, sendPrivate } from './actions.js';
+AWS.config.update({ region: 'ap-southeast-2' });
+import AWS from 'aws-sdk';
 
 export const handler = async (event, context) => {
 
@@ -17,6 +19,7 @@ export const handler = async (event, context) => {
     lambdaActions.action('$connect', $connect);
     lambdaActions.action('$disconnect', $disconnect);
     lambdaActions.action('setName', setName);
+    lambdaActions.action('updateName', updateName);
     lambdaActions.action('sendPublic', sendPublic);
     lambdaActions.action('sendPrivate', sendPrivate);
 

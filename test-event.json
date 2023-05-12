@@ -1,0 +1,7 @@
+{
+  "requestContext": {
+    "connectionId": "test-connection-id",
+    "routeKey": "setName"
+  },
+  "body": "{\"name\": \"John Doe\"}"
+}

@@ -1,5 +1,5 @@
 import { LambdaActions } from 'lambda-actions';
-import { $connect, $disconnect, setName, sendPublic, sendPrivate } from './actions';
+import { $connect, $disconnect, setName, sendPublic, sendPrivate } from './actions.js';
 
 export const handler = async (event, context) => {
 
@@ -32,3 +32,4 @@ export const handler = async (event, context) => {
 
   return {};
 };
+

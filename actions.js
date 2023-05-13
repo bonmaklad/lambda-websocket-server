@@ -49,20 +49,30 @@ export const setName = async (payload) => {
   return {};
 };
 
-//create a one on one private message room. Used for when you want to send someone a message on necta for the first time
-export const sendPrivate = async (payload, meta) => {
+//create a one on one private message room. Used for when you want to send someone a message 
+//on necta for the first time
+// create a one-on-one private message room. Used for when you want to send someone a message 
+// on Necta for the first time
+const generateAccessKey = () => {
+  // Logic to generate a random access key
+  return Math.random().toString(36).substring(2, 8);
+};
+
+const generateChatRoomId = (userId1, userId2) => {
+  // Combine the user IDs to generate the chat room ID
+  return userId1.toString() + userId2.toString();
+};
+
+export const sendPrivate = async (payload) => {
   const connection = await pool.getConnection();
   try {
-    const senderQuery = "SELECT user FROM users WHERE id = ?";
-    const senderResult = await connection.query(senderQuery, [meta.connectionId]);
-    const senderUser = senderResult[0].user;
+    // Create a new chat room entry for user_id_1
+    const createChatRoomQuery1 = "INSERT INTO messenger.user_chat_rooms (user_id, chat_room_id, access_key) VALUES (?, ?, ?)";
+    await connection.query(createChatRoomQuery1, [2, 3, '1234']);
 
-    const receiverQuery = "SELECT id FROM users WHERE user = ?";
-    const receiverResult = await connection.query(receiverQuery, [payload.to]);
-    const receiverId = receiverResult[0].id;
-
-    const message = `${senderUser}: ${payload.message}`;
-    await sendToOne(receiverId, { privateMessage: message });
+    // Create a new chat room entry for user_id_2
+    const createChatRoomQuery2 = "INSERT INTO messenger.user_chat_rooms (user_id, chat_room_id, access_key) VALUES (?, ?, ?)";
+    await connection.query(createChatRoomQuery2, [4, 3, '1234']);
   } catch (err) {
     console.error(err);
   } finally {
@@ -73,6 +83,21 @@ export const sendPrivate = async (payload, meta) => {
 
   return {};
 };
+
+
+
+
+
+
+
+/* // Function to generate a unique chat room ID
+const generateChatRoomId = () => {
+  // Generate a unique ID using your preferred method (e.g., UUID library, random string, etc.)
+  // For simplicity, let's generate a random 6-digit number
+  const chatRoomId = Math.floor(100000 + Math.random() * 900000).toString();
+  return chatRoomId;
+}; */
+
 
 //send a message to someone inside that private 1:1 room 
 const sendToOne = async (id, body) => {

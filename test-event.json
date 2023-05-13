@@ -1,7 +1,4 @@
 {
-  "requestContext": {
-    "connectionId": "test-connection-id",
-    "routeKey": "setName"
-  },
-  "body": "{\"name\": \"Glser\", \"email\": \"tesst4@example.com\"}"
+  "userIds": [1, 2]
 }
+
